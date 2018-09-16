@@ -61,6 +61,8 @@ app.use(function(req, res, next) {
 
 app.use(express.static(__dirname + '/public'));
 
+app.use(require('body-parser')());
+
 app.get('/', function (req, res) {
     res.render('home');
 });
@@ -70,6 +72,18 @@ app.get('/about', function (req, res) {
         fortune: fortune.getFortune(),
         pageTestScript: '/qa/tests-about.js'
     });
+});
+
+app.get('/newsletter', function(req, res) {
+    res.render('newsletter', {csrf: 'CSRF token goes here'});
+});
+
+app.post('/process', function(req, res) {
+    if(req.xhr || req.accepts('json,html')==='json') {
+        res.send({success: true});
+    } else {
+        res.redirect(303, '/thank-you');
+    }
 });
 
 app.get('/tours/hood-river', function(req, res) {
@@ -95,6 +109,10 @@ app.get('/data/nursery-rhyme', function(req, res) {
 
 app.get('/nursery-rhythm', function(req, res) {
     res.render('nursery-rhythm');
+});
+
+app.get('/thank-you', function(req, res) {
+    res.render('thank-you');
 });
 
 // 定制 404 页面
