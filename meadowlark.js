@@ -1,4 +1,5 @@
 var express = require('express');
+var formidable = require('formidable');
 var app = express();
 
 var handlebars = require('express3-handlebars').create({
@@ -94,25 +95,43 @@ app.get('/tours/request-group-rate', function(req, res) {
     res.render('tours/request-group-rate');
 });
 
-app.get('/nursery-rhyme', function(req, res) {
-    res.render('nursery-rhyme');
+app.get('/nursery-rhythm', function(req, res) {
+    res.render('nursery-rhythm');
 });
 
-app.get('/data/nursery-rhyme', function(req, res) {
+app.get('/data/nursery-rhythm', function(req, res) {
     res.json({
         animal: 'squirrel',
         bodyPart: 'tail',
         adjective: 'bushy',
         noun: 'heck'
     });
-});
-
-app.get('/nursery-rhythm', function(req, res) {
-    res.render('nursery-rhythm');
-});
+});``
 
 app.get('/thank-you', function(req, res) {
     res.render('thank-you');
+});
+
+app.get('/contest/vacation-photo/:year/:month', function(req, res) {
+    var now = new Date();
+    res.render('contest/vacation-photo', {
+        year: now.getFullYear(),
+        month: now.getMonth()
+    });
+});
+
+app.post('/contest/vacation-photo/:year/:month', function(req, res) {
+    var now = new formidable.IncomingForm();
+    form.parse(req, function(err, fields, files) {
+        if(err) return res.redirect(303, '/error');
+        form.parse(req, function(err, fields, files) {
+            console.log('received fields:');
+            console.log(fields);
+            console.log('received files:');
+            console.log(files);
+            res.redirect(303, '/thank-you');
+        });
+    });
 });
 
 // 定制 404 页面
