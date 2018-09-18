@@ -106,7 +106,7 @@ app.get('/data/nursery-rhythm', function(req, res) {
         adjective: 'bushy',
         noun: 'heck'
     });
-});``
+});
 
 app.get('/contest/vacation-photo', function(req, res) {
     var now = new Date();
