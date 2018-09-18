@@ -108,11 +108,7 @@ app.get('/data/nursery-rhythm', function(req, res) {
     });
 });``
 
-app.get('/thank-you', function(req, res) {
-    res.render('thank-you');
-});
-
-app.get('/contest/vacation-photo/:year/:month', function(req, res) {
+app.get('/contest/vacation-photo', function(req, res) {
     var now = new Date();
     res.render('contest/vacation-photo', {
         year: now.getFullYear(),
@@ -121,17 +117,19 @@ app.get('/contest/vacation-photo/:year/:month', function(req, res) {
 });
 
 app.post('/contest/vacation-photo/:year/:month', function(req, res) {
-    var now = new formidable.IncomingForm();
+    var form = new formidable.IncomingForm();
     form.parse(req, function(err, fields, files) {
         if(err) return res.redirect(303, '/error');
-        form.parse(req, function(err, fields, files) {
-            console.log('received fields:');
-            console.log(fields);
-            console.log('received files:');
-            console.log(files);
-            res.redirect(303, '/thank-you');
-        });
+        console.log('received fields:');
+        console.log(fields);
+        console.log('received files:');
+        console.log(files);
+        res.redirect(303, '/thank-you');
     });
+});
+
+app.get('/thank-you', function(req, res) {
+    res.render('thank-you');
 });
 
 // 定制 404 页面
