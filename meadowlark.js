@@ -1,6 +1,8 @@
 var express = require('express');
 var formidable = require('formidable');
 var credentials = require('./credentials.js');
+var nodemailer = require('nodemailer');
+var emailService = require('./lib/email.js')(credentials);
 
 var app = express();
 
@@ -27,6 +29,16 @@ app.use(function(req, res, next) {
     res.locals.showTests = app.get('env') !== 'production' && req.query.test === '1';
     next();
 });
+
+switch(app.get('env')) {
+    case 'development':
+        app.use(require('morgan')('dev'));
+        break;
+    case 'production':
+        app.use(require('express-loader')({
+            path: __dirname + '/var/log/requests.log'
+        }));
+}
 
 app.use(require('body-parser')());
 app.use(require('cookie-parser')(credentials.cookieSecret));
@@ -59,12 +71,6 @@ function getWeatherData() {
         ]
     }
 }
-
-app.use(function(req, res, next) {
-    if(!res.locals.partials) res.locals.partials = {};
-    res.locals.partials.weather = getWeatherData();
-    next();
-});
 
 app.use(express.static(__dirname + '/public'));
 
@@ -136,6 +142,41 @@ app.get('/thank-you', function(req, res) {
     res.render('thank-you');
 });
 
+app.post('/cart/checkout', function(req, res) {
+    var cart = req.session.cart;
+    var VALID_EMAIL_REGEX = /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/g;
+    var name = req.body.name || '',
+        email = req.body.email || '';
+
+    if(!cart) next(new Error('Cart does not exist.'));
+
+    if(!email.match(VALID_EMAIL_REGEX)) return res.next(new Error('Invalid email address.'));
+
+    cart.number = Math.random().toString().replace(/^0\.0*/, '');
+    cart.billing = {
+        name: name,
+        email: email
+    };
+
+    res.render('email/cart-thank-you', {layout: null, cart: cart}, function(err, html) {
+        if(err) console.log('error in email template');
+        emailService.send(cart.billing.email, 'Thank you for Book you Trip with meadowlark', html);
+    });
+    res.render('cart-thank-you', {cart: cart});
+});
+
+app.use(function(req, res, next) {
+    if(!res.locals.partials) res.locals.partials = {};
+    res.locals.partials.weather = getWeatherData();
+    next();
+});
+
+// app.use(function(req, res, next) {
+//     res.locals.flash = req.session.flash;
+//     delete req.session.flash;
+//     next();
+// });
+
 // 定制 404 页面
 app.use(function(req, res) {
     res.status(404);
@@ -150,5 +191,5 @@ app.use(function(err, req, res, next) {
 });
 
 app.listen(app.get('port'), function() {
-    console.log('Express started on http://localhost:' + app.get('port') + '; press Ctrl-C to terminate.');
+    console.log('Express started in ' + app.get('env') + ' mode on http://localhost:' + app.get('port') + '; press Ctrl-C to terminate.');
 });
