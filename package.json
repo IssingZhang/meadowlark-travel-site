@@ -4,6 +4,8 @@
   "description": "",
   "main": "meadowlark.js",
   "scripts": {
+    "dev": "node meadowlark.js",
+    "build": "set NODE_ENV=production && node meadowlark_cluster.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
